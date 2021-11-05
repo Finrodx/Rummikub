@@ -12,14 +12,27 @@ namespace Rummikub
         List<Piece> pieces = new List<Piece>();
         List<Piece> indicators = new List<Piece>();
         List<Piece> jokers = new List<Piece>();
+        List<Player> players = new List<Player>() {new Player(), new Player(), new Player(), new Player()};
 
-        public void prepareNewGame()
+        public void PrepareNewGame()
         {
+            ShufllePlayers();
             CreatePieces();
             ShufflePieces();
             CreateJokerPiece();
+            DealPieces();
         }
 
+        private void ShufllePlayers()
+        {
+            Random rnd = new Random();
+            int random = rnd.Next(0, 4);
+
+            Player luckyPlayer = players[random];
+            players[random] = players[0];
+            players[0] = luckyPlayer;
+
+        }
         public List<Piece> CreatePieces()
         {
             foreach (string color in colors)
@@ -77,9 +90,60 @@ namespace Rummikub
             }
         }
 
+        private void DealPieces()
+        {
+            // deal 3 times
+            for (int dealNo = 0; dealNo < 3; dealNo++)
+            {
+                // 4 players 
+                for (int playerNo = 0; playerNo < 4; playerNo++)
+                {
+                    // deal 5 piece each time
+                    for (int pieceNo = 0; pieceNo < 5; pieceNo++)
+                    {
+                        if(dealNo != 2)
+                        {
+                            players[playerNo].getPlayersHand().Add(pieces[0]);
+                            pieces.RemoveAt(0);
+                        }
+                        else if (dealNo == 2 & playerNo == 0)
+                        {
+                            players[0].getPlayersHand().Add(pieces[0]);
+                            pieces.RemoveAt(0);
+                        }
+                        else if (dealNo == 2 & playerNo != 0)
+                        {
+                            if(pieceNo == 4)
+                            {
+                                pieceNo = 5;
+                            }
+                            else
+                            {
+                                players[playerNo].getPlayersHand().Add(pieces[0]);
+                                pieces.RemoveAt(0);
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
         public List<Piece> GetPieces()
         {
             return pieces;
+        }
+
+        public void getPlayerHands()
+        {
+            foreach (Player player in players)
+            {
+                Console.WriteLine("\n Player: \n");
+                foreach (Piece piece in player.getPlayersHand())
+                {
+                    Console.WriteLine(piece.color + " " + piece.number);
+                }
+                
+            }
         }
     }
 }
