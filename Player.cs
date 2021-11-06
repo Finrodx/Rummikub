@@ -8,11 +8,10 @@ namespace Rummikub
     class Player
     {
         private List<Piece> playerHand = new List<Piece>();
-        private List<Piece> play = new List<Piece>();
         private Piece joker;
         private List<List<Piece>> groups = new List<List<Piece>>();
-        private List<Piece> jokersInHand;
-        private List<Piece> fakeJokers;
+        private List<Piece> jokersInHand = new List<Piece>();
+        private List<Piece> fakeJokers = new List<Piece>();
         private int jokerCount;
         private int fakeJokerCount;
 
@@ -24,6 +23,7 @@ namespace Rummikub
             if (ifPlayerHasFakeJoker())
                 howManyFakeJokersPlayerHas();            
             sortHand();
+            organizeHand();
         }
 
 
@@ -83,87 +83,157 @@ namespace Rummikub
             return playerHand;
         }
 
-        public void organizeHand()
+        private void organizeHand()
         {
 
+            findConsecutive(playerHand);
         }
 
-        private void findConsecutive()
+        private void findConsecutive(List <Piece> pieceList)
         {
+            Console.WriteLine("\n \n \n PLAYER \n");
             bool priority = false; //if a run has missing piece between two piece, and if player has okey I am giving this case a priority
-            Piece priorityPiece; //information of priority piece
+            Piece priorityPiece = null; //information of priority piece
 
-            play.AddRange(playerHand);
+            List<Piece> play = new List<Piece>();
+            play.AddRange(pieceList);
 
             for (int i = 0; i < play.Count; i++)
             {
-                List<Piece> run = new List<Piece>();
                 Piece piece = play[i];
-                run.Add(piece);
-                play.Remove(piece);
-
-                for (int x = i; x < play.Count; x++)
+                List<Piece> run = new List<Piece>();
+                if (piece.ifSamePiece(joker))
                 {
-                    Piece nextPiece = playerHand[x];
-                    //ignore if next piece is joker
-                    if (nextPiece.ifSamePiece(joker))
+                    //TODO first element joker
+                }
+                else
+                {
+                    run.Add(piece);
+                    play.Remove(piece);
+
+                    for (int x = 0; x < play.Count; x++)
                     {
-                        //TODO if joker is the next piece
-                    }
-                    else
-                    {
-                        //if last piece of a run is a fakejoker
-                        if (run[run.Count - 1].fakeJoker == true)
+                        Piece nextPiece = playerHand[x];
+                        //ignore if next piece is joker
+                        if (nextPiece.ifSamePiece(joker))
                         {
-                            if (piece.ifNextConsecutivePiece(nextPiece))
+                            //TODO if joker is the next piece
+                        }
+                        else
+                        {
+                            //if last piece of a run is a fakejoker
+                            if (run[run.Count - 1].fakeJoker == true)
+                            {
+                                if (piece.ifNextConsecutivePiece(nextPiece))
+                                {
+                                    run.Add(nextPiece);
+                                    play.Remove(nextPiece);
+                                }
+                            }
+                            //if piece is consecutive add it to run
+                            else if (run[run.Count - 1].ifNextConsecutivePiece(nextPiece))
                             {
                                 run.Add(nextPiece);
                                 play.Remove(nextPiece);
                             }
-                        }
-
-                        else if (piece.ifNextConsecutivePiece(nextPiece))
-                        {
-                            run.Add(nextPiece);
-                            play.Remove(nextPiece);
-                        }
-                        //if checked piece is a fakejoker
-                        else if (nextPiece.fakeJoker == true)
-                        {
-                            //if fakejoker is a correct fit
-                            if (run[run.Count - 1].ifNextConsecutivePiece(joker))
+                            //if checked piece is a fakejoker
+                            else if (nextPiece.fakeJoker == true)
                             {
-                                run.Add(nextPiece);
-                                play.Remove(nextPiece);
+                                //if fakejoker is a correct fit
+                                if (run[run.Count - 1].ifNextConsecutivePiece(joker))
+                                {
+                                    run.Add(nextPiece);
+                                    play.Remove(nextPiece);
+                                }
+                            }
+                            //detecting priorty case
+                            else if (run[run.Count - 1].number + 2 == nextPiece.number & ifPlayerHasJoker())
+                            {
+                                priority = true;
+                                priorityPiece = nextPiece;
                             }
                         }
-                        else if(run[run.Count-1].number + 2 == nextPiece.number)
+                        Console.WriteLine("Run eleman sayısı: " + run.Count);
+                        foreach (Piece item in run)
                         {
-                            priority = true;
-                            priorityPiece = nextPiece;
+                            Console.WriteLine("Run da islem yapılmadan once: " + item.color + " " + item.number);
+                        }
+                    }
+                    //if run has 2 elements we can special cases to make it 3
+                    if (run.Count == 2)
+                    {
+                        // adding "1" to a run which has two pieces and ending with 13
+                        if (run[run.Count - 1].number == 13)
+                        {
+                            run.Add(playerHand.FirstOrDefault(x => x.color == run[run.Count - 1].color & x.number == 1));
+                            Console.WriteLine("run da 2 eleman var ve 13-1 ozel durumu var ");
+                        }
+
+                        if (ifPlayerHasJoker() == true)
+                        {
+                            //Todo joker kullanıldı mı kontrolu yok
+                            Console.WriteLine("run da 2 eleman var ve player da okey var ");
+                            //if player has joker and there is a priority case
+                            if (priority == true)
+                            {
+                                Console.WriteLine("run da 2 eleman var, okey var ve oncelikli durum var");
+                                Piece jokerInHand = play.First(x => x.ifSamePiece(joker));
+                                run.Add(jokerInHand);
+                                play.Remove(jokerInHand);
+                                run.Add(priorityPiece);
+                                play.Remove(priorityPiece);
+
+                                priorityPiece = null;
+                                priority = false;
+                            }
                         }
                     }
 
-                }
-                //if run has 2 elements we can special cases to make it 3
-                if (run.Count == 2)
-                {
-                    // adding "1" to a run which has two pieces and ending with 13
-                    if (run[run.Count - 1].number == 13)
-                        run.Add(playerHand.FirstOrDefault(x => x.color == run[run.Count - 1].color & x.number == 1));
-                    if(ifPlayerHasJoker() == true)
+                    else if (run.Count <= 2)
                     {
+                        Console.WriteLine("Runda silinenler. 2 veya daha az elemanlı olmalı");
+                        foreach (Piece item in run)
+                        {
+                            Console.WriteLine(item.color + " " + item.number);
+                        }
 
+                        run.Clear();
+                    }
+                    else if (run.Count > 2)
+                    {
+                        Console.WriteLine("Gruba Eklenen Run. 2'den daha cokelemanlı olmalı");
+                        foreach (Piece item in run)
+                        {
+                            Console.WriteLine(item.color + " " + item.number);
+                        }
+                        Console.WriteLine("Run eleman sayısı: " + run.Count);
+                        groups.Add(run);
+                        Console.WriteLine("Grup eleman sayısı:" + groups.Count);
                     }
                 }
-                else if(run.Count <= 2)
+
+            }
+        }
+        private void findColourGroups(List<Piece> pieceList)
+        {
+            List<Piece> play = new List<Piece>();
+            List<Piece> colourGroup = new List<Piece>();
+            List<List<Piece>> Group = new List<List<Piece>>();
+            play.AddRange(pieceList);
+            
+            for (int i = 0; i < play.Count; i++)
+            {
+                colourGroup.Add(play[i]);
+                Piece piece = play[i];
+                for (int x = 1; x < play.Count; x++)
                 {
-                    run.Clear();
+                    if (piece.ifDifferentColor(play[x]))
+                    {
+                        colourGroup.Add(play[x]);
+                        play.Remove(play[x]);
+                    }
                 }
-                else if (run.Count > 2)
-                {
-                    groups.Add(run);
-                }
+
             }
         }
     }

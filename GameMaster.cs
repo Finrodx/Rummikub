@@ -23,6 +23,7 @@ namespace Rummikub
             CreateJokerPiece();
             DealPieces();
             sendJokerInfoToPlayers();
+            playersOrganizePieces();
         }
 
         private void ShufllePlayers()
@@ -163,6 +164,14 @@ namespace Rummikub
             foreach (Player player in players)
             {
                 player.newGameJokerInfoToPlayers(jokers[0]);
+            }
+        }
+
+        public void playersOrganizePieces()
+        {
+            foreach (Player player in players)
+            {
+                player.preparePlayerToNewGame();
             }
         }
     }
