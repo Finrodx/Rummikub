@@ -13,6 +13,7 @@ namespace Rummikub
         List<Piece> indicators = new List<Piece>();
         List<Piece> jokers = new List<Piece>();
         List<Player> players = new List<Player>() {new Player(), new Player(), new Player(), new Player()};
+        Random rnd = new Random();
 
         public void PrepareNewGame()
         {
@@ -21,11 +22,11 @@ namespace Rummikub
             ShufflePieces();
             CreateJokerPiece();
             DealPieces();
+            sendJokerInfoToPlayers();
         }
 
         private void ShufllePlayers()
         {
-            Random rnd = new Random();
             int random = rnd.Next(0, 4);
 
             Player luckyPlayer = players[random];
@@ -56,7 +57,6 @@ namespace Rummikub
         // Fisher-Yates shuffle
         private void Shuffle(List<Piece> pieces)
         {
-            Random rnd = new Random();
             int n = pieces.Count;
             while (n > 1)
             {
@@ -70,7 +70,6 @@ namespace Rummikub
 
         public void CreateJokerPiece()
         {
-            Random rnd = new Random();
             int random = rnd.Next(0, 106);
 
             Piece indicatorPiece;
@@ -82,11 +81,22 @@ namespace Rummikub
                     break;
                 }
             }
+            //removing one of the indicator piece since it wont be in game
             pieces.Remove(indicatorPiece);
-
-            foreach (Piece jokerPiece in pieces.FindAll(x => x.number == indicatorPiece.number + 1 & x.color == indicatorPiece.color))
+            if(indicatorPiece.number != 13)
             {
-                jokers.Add(jokerPiece);
+                foreach (Piece jokerPiece in pieces.FindAll(x => x.number == indicatorPiece.number + 1 & x.color == indicatorPiece.color))
+                {
+                    jokers.Add(jokerPiece);
+                }
+            }
+            //if indicator is 13. 1 is our joker
+            else if(indicatorPiece.number == 13)
+            {
+                foreach (Piece jokerPiece in pieces.FindAll(x => x.number == 1 & x.color == indicatorPiece.color))
+                {
+                    jokers.Add(jokerPiece);
+                }
             }
         }
 
@@ -124,7 +134,6 @@ namespace Rummikub
                             }
                         }
                     }
-
                 }
             }
         }
@@ -133,16 +142,27 @@ namespace Rummikub
             return pieces;
         }
 
-        public void getPlayerHands()
+        public void printPlayerHands()
         {
             foreach (Player player in players)
             {
                 Console.WriteLine("\n Player: \n");
                 foreach (Piece piece in player.getPlayersHand())
                 {
+                    if (jokers.Contains(piece))
+                    {
+                        Console.WriteLine(piece.color + " " + piece.number + " " + "okey");
+                    }
+                    else
                     Console.WriteLine(piece.color + " " + piece.number);
-                }
-                
+                }              
+            }
+        }
+        public void sendJokerInfoToPlayers()
+        {
+            foreach (Player player in players)
+            {
+                player.newGameJokerInfoToPlayers(jokers[0]);
             }
         }
     }

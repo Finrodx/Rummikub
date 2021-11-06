@@ -24,7 +24,33 @@ namespace Rummikub
             }
         }
 
-        
+        public bool ifSamePiece(Piece piece)
+        {
+            if (this.color == piece.color & this.number == piece.number)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
 
+        public bool ifNextConsecutivePiece(Piece piece)
+        {
+            if (this.color == piece.color & this.number + 1 == piece.number)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
+        public bool ifDifferentColor(Piece piece)
+        {
+            if (this.color != piece.color & this.number  == piece.number)
+            {
+                return true;
+            }
+            else
+                return false;
+        }
     }
 }

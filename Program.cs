@@ -11,9 +11,8 @@ namespace Rummikub
             Console.WriteLine("Hello World!");
 
             GameMaster gm = new GameMaster();
-            gm.PrepareNewGame();
-            gm.getPlayerHands();
-
+            //gm.PrepareNewGame();
+            //gm.printPlayerHands();
 
         }
     }
