@@ -97,17 +97,17 @@ namespace Rummikub
             {
                 List<List<Piece>> organizedHand = new List<List<Piece>>();
                 int locationOfUnusedPieces = findConsecutive(playerHand).Count - 1;
-                List<List<Piece>> restAfterCons = findConsecutive(playerHand);
-                List<List<Piece>> restAfterColors = findColourGroups(restAfterCons[locationOfUnusedPieces]);
+                List<List<Piece>> listAfterCons = findConsecutive(playerHand);
+                List<List<Piece>> listAfterColors = findColourGroups(listAfterCons[locationOfUnusedPieces]);
                 
                 //ardısık ve aynı renkli dizileri ilk kez bulduktan sonra bu grupların hepsini tek bir listeye toplama. son eleman kullanılmayan elemanlar.
                 for (int i = 0; i < locationOfUnusedPieces; i++)
                 {
-                    organizedHand.Add(restAfterCons[i]);
+                    organizedHand.Add(listAfterCons[i]);
                 }
-                for (int i = 0; i < restAfterColors.Count; i++)
+                for (int i = 0; i < listAfterColors.Count; i++)
                 {
-                    organizedHand.Add(restAfterColors[i]);
+                    organizedHand.Add(listAfterColors[i]);
                 }
                 remainingPieces = organizedHand[organizedHand.Count-1].Count;
                 showHand(organizedHand);
@@ -146,7 +146,7 @@ namespace Rummikub
                         //ignore if next piece is joker
                         if (nextPiece.ifSamePiece(joker))
                         {
-                            Console.WriteLine("sonra ki tas okey");
+                            //Console.WriteLine("sonra ki tas okey");
                             //TODO if joker is the next piece
                         }
                         // run'a ardısık elemanı ekleme
@@ -212,14 +212,14 @@ namespace Rummikub
                         }
                     }
 
-                    else if (run.Count <= 2)
+                    if (run.Count <= 2)
                     {
                         foreach (Piece item in run)
                         {
                             nonCons.Add(item);
                         }
                     }
-                    if (run.Count > 2)
+                    else if (run.Count > 2)
                         listOfRuns.Add(run);
                 }
                 //if (run.Count > 2)
@@ -317,7 +317,7 @@ namespace Rummikub
                         unusedPiecesList.Add(item);
                     }
                 }
-                else//colour group un 2 den fazla elemanı olması
+                if(colourGroup.Count > 2)//colour group un 2 den fazla elemanı olması
                     ColorGroupList.Add(colourGroup);
             }
             ColorGroupList.Add(unusedPiecesList);
