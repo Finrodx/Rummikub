@@ -12,7 +12,7 @@ namespace Rummikub
         List<Piece> pieces = new List<Piece>();
         List<Piece> indicators = new List<Piece>();
         List<Piece> jokers = new List<Piece>();
-        List<Player> players = new List<Player>() {new Player(), new Player(), new Player(), new Player()};
+        List<Player> players = new List<Player>() {new Player("Ahmet"), new Player("Ceren"), new Player("Yiğit"), new Player("Pelin")};
         Random rnd = new Random();
 
         public void PrepareNewGame()
@@ -143,11 +143,12 @@ namespace Rummikub
             return pieces;
         }
 
-        public void printPlayerHands()
+        public void printNotOrganizedPlayerHands()
         {
+            Console.WriteLine("not organized:");
             foreach (Player player in players)
             {
-                Console.WriteLine("\n Player: \n");
+                Console.WriteLine("\n Player: "+ player.Name + "\n");
                 foreach (Piece piece in player.getPlayersHand())
                 {
                     if (jokers.Contains(piece))
@@ -157,6 +158,17 @@ namespace Rummikub
                     else
                     Console.WriteLine(piece.color + " " + piece.number);
                 }              
+            }
+        }
+
+        public void printOrganizedPlayerHands()
+        {
+            Console.WriteLine("organized:");
+            foreach (Player player in players)
+            {
+                Console.WriteLine("\n Player: " + player.Name + "n");
+
+                player.organizeAndShowHand();
             }
         }
         public void sendJokerInfoToPlayers()

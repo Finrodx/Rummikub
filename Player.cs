@@ -7,6 +7,7 @@ namespace Rummikub
 {
     class Player
     {
+        public string Name;
         private List<Piece> playerHand = new List<Piece>();
         private Piece joker;
         private List<List<Piece>> groups = new List<List<Piece>>();
@@ -15,17 +16,19 @@ namespace Rummikub
         private int jokerCount;
         private int fakeJokerCount;
 
+        public Player(string Name)
+        {
+            this.Name = Name;
+        }
         public void preparePlayerToNewGame()
         {
-            groups.Clear();
-            if (ifPlayerHasJoker())
-                howManyJokersPlayerHas();
-            if (ifPlayerHasFakeJoker())
-                howManyFakeJokersPlayerHas();            
-            sortHand();
-            organizeHand();
+                groups.Clear();
+                if (ifPlayerHasJoker())
+                    howManyJokersPlayerHas();
+                if (ifPlayerHasFakeJoker())
+                    howManyFakeJokersPlayerHas();
+                sortHand();
         }
-
 
         private bool ifPlayerHasJoker()
         {
@@ -83,17 +86,41 @@ namespace Rummikub
             return playerHand;
         }
 
-        private void organizeHand()
+        public void organizeAndShowHand()
         {
+            if(ifShouldTryDoublesFinish() == true)
+            {
+                //todo doublesfinish
+            }
+            else
+            {
+                List<List<Piece>> organizedHand = new List<List<Piece>>();
+                int locationOfUnusedPieces = findConsecutive(playerHand).Count - 1;
+                List<List<Piece>> restAfterCons = findConsecutive(playerHand);
+                List<List<Piece>> restAfterColors = findColourGroups(restAfterCons[locationOfUnusedPieces]);
+                
+                //ardısık ve aynı renkli dizileri ilk kez bulduktan sonra bu grupların hepsini tek bir listeye toplama. son eleman kullanılmayan elemanlar.
+                for (int i = 0; i < locationOfUnusedPieces; i++)
+                {
+                    organizedHand.Add(restAfterCons[i]);
+                }
+                for (int i = 0; i < restAfterColors.Count; i++)
+                {
+                    organizedHand.Add(restAfterColors[i]);
+                }
+                showHand(organizedHand);
+            }
 
-            findConsecutive(playerHand);
         }
 
-        private void findConsecutive(List <Piece> pieceList)
+        //finds all consecutive same colored pieces and adds them to a list. last element of list contains all unused pieces
+        private List<List<Piece>> findConsecutive(List <Piece> pieceList)
         {
-            Console.WriteLine("\n \n \n PLAYER \n");
+            List<Piece> nonCons = new List<Piece>();
             bool priority = false; //if a run has missing piece between two piece, and if player has okey I am giving this case a priority
             Piece priorityPiece = null; //information of priority piece
+
+            List<List<Piece>> listOfRuns = new List<List<Piece>>();
 
             List<Piece> play = new List<Piece>();
             play.AddRange(pieceList);
@@ -124,7 +151,7 @@ namespace Rummikub
                             //if last piece of a run is a fakejoker
                             if (run[run.Count - 1].fakeJoker == true)
                             {
-                                if (piece.ifNextConsecutivePiece(nextPiece))
+                                if (piece.ifNextConsecutivePiece(joker))
                                 {
                                     run.Add(nextPiece);
                                     play.Remove(nextPiece);
@@ -153,11 +180,6 @@ namespace Rummikub
                                 priorityPiece = nextPiece;
                             }
                         }
-                        Console.WriteLine("Run eleman sayısı: " + run.Count);
-                        foreach (Piece item in run)
-                        {
-                            Console.WriteLine("Run da islem yapılmadan once: " + item.color + " " + item.number);
-                        }
                     }
                     //if run has 2 elements we can special cases to make it 3
                     if (run.Count == 2)
@@ -166,17 +188,14 @@ namespace Rummikub
                         if (run[run.Count - 1].number == 13)
                         {
                             run.Add(playerHand.FirstOrDefault(x => x.color == run[run.Count - 1].color & x.number == 1));
-                            Console.WriteLine("run da 2 eleman var ve 13-1 ozel durumu var ");
                         }
 
                         if (ifPlayerHasJoker() == true)
                         {
                             //Todo joker kullanıldı mı kontrolu yok
-                            Console.WriteLine("run da 2 eleman var ve player da okey var ");
                             //if player has joker and there is a priority case
                             if (priority == true)
                             {
-                                Console.WriteLine("run da 2 eleman var, okey var ve oncelikli durum var");
                                 Piece jokerInHand = play.First(x => x.ifSamePiece(joker));
                                 run.Add(jokerInHand);
                                 play.Remove(jokerInHand);
@@ -191,49 +210,182 @@ namespace Rummikub
 
                     else if (run.Count <= 2)
                     {
-                        Console.WriteLine("Runda silinenler. 2 veya daha az elemanlı olmalı");
                         foreach (Piece item in run)
                         {
-                            Console.WriteLine(item.color + " " + item.number);
                         }
-
+                        foreach (Piece item in run)
+                        {
+                            nonCons.Add(item);
+                        }
                         run.Clear();
                     }
                     else if (run.Count > 2)
                     {
-                        Console.WriteLine("Gruba Eklenen Run. 2'den daha cokelemanlı olmalı");
-                        foreach (Piece item in run)
-                        {
-                            Console.WriteLine(item.color + " " + item.number);
-                        }
-                        Console.WriteLine("Run eleman sayısı: " + run.Count);
+
                         groups.Add(run);
-                        Console.WriteLine("Grup eleman sayısı:" + groups.Count);
                     }
                 }
+                if (run.Count > 2)
+                    listOfRuns.Add(run);
+
 
             }
+            listOfRuns.Add(nonCons);
+            return listOfRuns;
         }
-        private void findColourGroups(List<Piece> pieceList)
+
+        //finds all samenumbered different colored pieces and adds them to a list. last element of list contains all unused pieces
+        private List<List<Piece>> findColourGroups(List<Piece> pieceList)
         {
-            List<Piece> play = new List<Piece>();
-            List<Piece> colourGroup = new List<Piece>();
-            List<List<Piece>> Group = new List<List<Piece>>();
-            play.AddRange(pieceList);
+            int ammountOfJokersInHand = pieceList.FindAll(x=> x.ifSamePiece(joker)).Count;
             
+            List<Piece> play = new List<Piece>();
+            List<List<Piece>> ColorGroupList = new List<List<Piece>>();
+            List<Piece> unusedPiecesList = new List<Piece>();
+            play.AddRange(pieceList);
+
             for (int i = 0; i < play.Count; i++)
             {
-                colourGroup.Add(play[i]);
+                List<Piece> colourGroup = new List<Piece>();
                 Piece piece = play[i];
-                for (int x = 1; x < play.Count; x++)
+                if (piece.ifSamePiece(joker))
                 {
-                    if (piece.ifDifferentColor(play[x]))
+                    //TODO first element joker
+                }
+                else
+                {
+                    colourGroup.Add(piece);
+                    play.Remove(piece);
+
+                    for (int x = 1; x < play.Count; x++)
                     {
-                        colourGroup.Add(play[x]);
-                        play.Remove(play[x]);
+                        Piece nextPiece = playerHand[x];
+                        //if last piece of a colourGroup is a fakejoker
+                        if (colourGroup[colourGroup.Count - 1].fakeJoker == true)
+                        {
+                            if (piece.ifDifferentColor(joker))
+                            {
+                                colourGroup.Add(nextPiece);
+                                play.Remove(nextPiece);
+                            }
+                        }
+                        //if piece is different color add it to colourGroup
+                        else if (colourGroup[colourGroup.Count - 1].ifDifferentColor(nextPiece))
+                        {
+                            bool ifGroupHasTheColour = false;
+                            foreach (Piece item in colourGroup)
+                            {
+                                if(item.color == nextPiece.color)
+                                {
+                                    ifGroupHasTheColour = true;
+                                    break;
+                                }
+                            }
+                            if(ifGroupHasTheColour != true)
+                            {
+                                colourGroup.Add(nextPiece);
+                                play.Remove(nextPiece);
+                            }
+                        }
+                        //if checked piece is a fakejoker
+                        else if (nextPiece.fakeJoker == true)
+                        {
+                            //if fakejoker is a correct fit
+                            if (colourGroup[colourGroup.Count - 1].ifDifferentColor(joker))
+                            {
+                                colourGroup.Add(nextPiece);
+                                play.Remove(nextPiece);
+                            }
+                        }
                     }
                 }
+                //if colourGroup has 2 elements we can add joker to make it 3
+                if (colourGroup.Count == 2)
+                {
+                    if (ammountOfJokersInHand > 0)
+                    {
+                        for (int j = 0; j < play.Count; j++)
+                        {
+                            if (play[i].ifSamePiece(joker))
+                            {
+                                colourGroup.Add(play[i]);
+                                break;
+                            }
+                        }
+                        
+                    }
+                }
+                else if (colourGroup.Count < 3)
+                {
+                    foreach (Piece item in colourGroup)
+                    {
+                        unusedPiecesList.Add(item);
+                    }
+                }
+                if(colourGroup.Count > 2)
+                    ColorGroupList.Add(colourGroup);
+            }
+            ColorGroupList.Add(unusedPiecesList);
+            return ColorGroupList;
+        }
 
+        private bool ifShouldTryDoublesFinish()
+        {
+            int doubleCount = 0;
+            for (int j = 0; j < playerHand.Count; j++)              
+            {
+                Piece piece = playerHand[j];
+                if (piece.ifSamePiece(joker))
+                    doubleCount++;
+                else
+                {
+                    for (int i = 1; i < playerHand.Count; i++)
+                    {
+                        if (i == j)
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            if (piece.ifSamePiece(joker))
+                                break;
+                            else
+                            {
+                                if (piece.ifSamePiece(playerHand[i]))
+                                    doubleCount++;
+                            }
+                        }
+                    }                    
+                }
+            }
+            if (doubleCount > 3)
+                return true;
+            return false;
+        }
+
+        public void showHand(List<List<Piece>> listofPieceLists)
+        {
+            Console.WriteLine("Okey: " + joker.color + " " + joker.number);
+            for (int i = 0; i < listofPieceLists.Count; i++)
+            {
+                if(i < listofPieceLists.Count - 1)
+                {
+                    foreach (Piece item in listofPieceLists[i])
+                    {
+                        if(item.fakeJoker == true)
+                            Console.WriteLine("Sahte Okey");
+                        else 
+                            Console.WriteLine(item.color + " " + item.number);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Kullanilmayan Taşlar:");
+                    foreach (Piece item in listofPieceLists[listofPieceLists.Count - 1])
+                    {
+                        Console.WriteLine(item.color + " " + item.number);
+                    }
+                }
             }
         }
     }

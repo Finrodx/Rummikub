@@ -36,6 +36,7 @@ namespace Rummikub
 
         public bool ifNextConsecutivePiece(Piece piece)
         {
+            //todo does not handle joker and fakejoker
             if (this.color == piece.color & this.number + 1 == piece.number)
             {
                 return true;
@@ -45,6 +46,7 @@ namespace Rummikub
         }
         public bool ifDifferentColor(Piece piece)
         {
+            //todo does not handle joker and fakejoker
             if (this.color != piece.color & this.number  == piece.number)
             {
                 return true;

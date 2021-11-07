@@ -8,11 +8,10 @@ namespace Rummikub
 
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
-
             GameMaster gm = new GameMaster();
             gm.PrepareNewGame();
-            gm.printPlayerHands();
+            gm.printNotOrganizedPlayerHands();
+            gm.printOrganizedPlayerHands();
 
         }
     }
