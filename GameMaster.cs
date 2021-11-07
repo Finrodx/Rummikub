@@ -103,6 +103,7 @@ namespace Rummikub
 
         private void DealPieces()
         {
+            // her oyuncuya desteden 3 kere 5 li taş dagıtılıyor. 3.dagıtımda ilk oyuncuya 5 diğerlerine 4 taş dağıtılıyor
             // deal 3 times
             for (int dealNo = 0; dealNo < 3; dealNo++)
             {
@@ -167,6 +168,7 @@ namespace Rummikub
             foreach (Player player in players)
             {
                 Console.WriteLine("\n Player: " + player.Name + "n");
+                Console.WriteLine("Kullanilmayan Taşlar:");
 
                 player.organizeAndShowHand();
             }

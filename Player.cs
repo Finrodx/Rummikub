@@ -140,9 +140,11 @@ namespace Rummikub
                     run.Add(piece);
                     play.Remove(piece);
 
-                    for (int x = 0; x < playerHand.Count; x++)
+                    for (int x = 0; x < play.Count; x +=1)
                     {
-                        Piece nextPiece = playerHand[x];
+                        Piece nextPiece = play[x];
+                        if (piece.number == nextPiece.number)
+                            break;
                         //ignore if next piece is joker
                         if (nextPiece.ifSamePiece(joker))
                         {
@@ -159,6 +161,7 @@ namespace Rummikub
                                 {
                                     run.Add(nextPiece);
                                     play.Remove(nextPiece);
+
                                 }
                             }
                             //if piece is consecutive add it to run
@@ -166,6 +169,7 @@ namespace Rummikub
                             {
                                 run.Add(nextPiece);
                                 play.Remove(nextPiece);
+
                             }
                             //if checked piece is a fakejoker
                             else if (nextPiece.fakeJoker == true)
@@ -175,10 +179,11 @@ namespace Rummikub
                                 {
                                     run.Add(nextPiece);
                                     play.Remove(nextPiece);
+
                                 }
                             }
                             //detecting priorty case
-                            else if (run[run.Count - 1].number + 2 == nextPiece.number & ifPlayerHasJoker())
+                            else if (run[run.Count - 1].number + 2 == nextPiece.number & ifPlayerHasJoker() & run[0].color == nextPiece.color)
                             {
                                 priority = true;
                                 priorityPiece = nextPiece;
@@ -191,7 +196,19 @@ namespace Rummikub
                         // adding "1" to a run which has two pieces and ending with 13
                         if (run[run.Count - 1].number == 13)
                         {
-                            run.Add(playerHand.FirstOrDefault(x => x.color == run[run.Count - 1].color & x.number == 1));
+                            //Elimizde 13ten sonra 1 var mı diye kontrol ediyoruz
+                            Piece pieceOne = playerHand.FirstOrDefault(x => x.color == run[run.Count - 1].color & x.number == 1);
+                            if (pieceOne != null)
+                                run.Add(pieceOne);
+                            if (ifPlayerHasJoker() == true)
+                            {
+                                Piece jokerInHand = play.First(x => x.ifSamePiece(joker));
+                                if (jokerInHand != null)
+                                {
+                                    run.Add(jokerInHand);
+                                    play.Remove(jokerInHand);
+                                }
+                            }
                         }
 
                         if (ifPlayerHasJoker() == true)
@@ -201,17 +218,19 @@ namespace Rummikub
                             if (priority == true)
                             {
                                 Piece jokerInHand = play.First(x => x.ifSamePiece(joker));
-                                run.Add(jokerInHand);
-                                play.Remove(jokerInHand);
-                                run.Add(priorityPiece);
-                                play.Remove(priorityPiece);
+                                if(jokerInHand != null)
+                                {
+                                    run.Add(jokerInHand);
+                                    play.Remove(jokerInHand);
+                                    run.Add(priorityPiece);
+                                    play.Remove(priorityPiece);
 
-                                priorityPiece = null;
-                                priority = false;
+                                    priorityPiece = null;
+                                    priority = false;
+                                }
                             }
                         }
                     }
-
                     if (run.Count <= 2)
                     {
                         foreach (Piece item in run)
@@ -359,7 +378,7 @@ namespace Rummikub
         }
 
         public void showHand(List<List<Piece>> listofPieceLists)
-        {
+        {/*
             Console.WriteLine("Okey: " + joker.color + " " + joker.number);
             for (int i = 0; i < listofPieceLists.Count - 1; i++)
             {
@@ -373,8 +392,8 @@ namespace Rummikub
                             Console.WriteLine(item.color + " " + item.number);
                     }
                 }
-            }
-            Console.WriteLine("Kullanilmayan Taşlar:");
+            }*/
+
             foreach (Piece item in listofPieceLists[listofPieceLists.Count - 1])
             {
                 if (item.fakeJoker == true)
