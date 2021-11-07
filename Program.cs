@@ -12,6 +12,7 @@ namespace Rummikub
             gm.PrepareNewGame();
             gm.printNotOrganizedPlayerHands();
             gm.printOrganizedPlayerHands();
+            gm.findClosestToWin();
 
         }
     }

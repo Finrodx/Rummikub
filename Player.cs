@@ -10,11 +10,12 @@ namespace Rummikub
         public string Name;
         private List<Piece> playerHand = new List<Piece>();
         private Piece joker;
-        private List<List<Piece>> groups = new List<List<Piece>>();
+        //private List<List<Piece>> groups = new List<List<Piece>>();
         private List<Piece> jokersInHand = new List<Piece>();
         private List<Piece> fakeJokers = new List<Piece>();
         private int jokerCount;
         private int fakeJokerCount;
+        private int remainingPieces;
 
         public Player(string Name)
         {
@@ -22,7 +23,7 @@ namespace Rummikub
         }
         public void preparePlayerToNewGame()
         {
-                groups.Clear();
+                remainingPieces = 0;
                 if (ifPlayerHasJoker())
                     howManyJokersPlayerHas();
                 if (ifPlayerHasFakeJoker())
@@ -108,6 +109,7 @@ namespace Rummikub
                 {
                     organizedHand.Add(restAfterColors[i]);
                 }
+                remainingPieces = organizedHand[organizedHand.Count-1].Count;
                 showHand(organizedHand);
             }
 
@@ -138,14 +140,16 @@ namespace Rummikub
                     run.Add(piece);
                     play.Remove(piece);
 
-                    for (int x = 0; x < play.Count; x++)
+                    for (int x = 0; x < playerHand.Count; x++)
                     {
                         Piece nextPiece = playerHand[x];
                         //ignore if next piece is joker
                         if (nextPiece.ifSamePiece(joker))
                         {
+                            Console.WriteLine("sonra ki tas okey");
                             //TODO if joker is the next piece
                         }
+                        // run'a ardısık elemanı ekleme
                         else
                         {
                             //if last piece of a run is a fakejoker
@@ -212,23 +216,14 @@ namespace Rummikub
                     {
                         foreach (Piece item in run)
                         {
-                        }
-                        foreach (Piece item in run)
-                        {
                             nonCons.Add(item);
                         }
-                        run.Clear();
                     }
-                    else if (run.Count > 2)
-                    {
-
-                        groups.Add(run);
-                    }
+                    if (run.Count > 2)
+                        listOfRuns.Add(run);
                 }
-                if (run.Count > 2)
-                    listOfRuns.Add(run);
-
-
+                //if (run.Count > 2)
+                //    listOfRuns.Add(run);
             }
             listOfRuns.Add(nonCons);
             return listOfRuns;
@@ -322,7 +317,7 @@ namespace Rummikub
                         unusedPiecesList.Add(item);
                     }
                 }
-                if(colourGroup.Count > 2)
+                else//colour group un 2 den fazla elemanı olması
                     ColorGroupList.Add(colourGroup);
             }
             ColorGroupList.Add(unusedPiecesList);
@@ -366,9 +361,9 @@ namespace Rummikub
         public void showHand(List<List<Piece>> listofPieceLists)
         {
             Console.WriteLine("Okey: " + joker.color + " " + joker.number);
-            for (int i = 0; i < listofPieceLists.Count; i++)
+            for (int i = 0; i < listofPieceLists.Count - 1; i++)
             {
-                if(i < listofPieceLists.Count - 1)
+                if(i < listofPieceLists.Count )
                 {
                     foreach (Piece item in listofPieceLists[i])
                     {
@@ -378,15 +373,20 @@ namespace Rummikub
                             Console.WriteLine(item.color + " " + item.number);
                     }
                 }
-                else
-                {
-                    Console.WriteLine("Kullanilmayan Taşlar:");
-                    foreach (Piece item in listofPieceLists[listofPieceLists.Count - 1])
-                    {
-                        Console.WriteLine(item.color + " " + item.number);
-                    }
-                }
             }
+            Console.WriteLine("Kullanilmayan Taşlar:");
+            foreach (Piece item in listofPieceLists[listofPieceLists.Count - 1])
+            {
+                if (item.fakeJoker == true)
+                    Console.WriteLine("Sahte Okey");
+                else
+                    Console.WriteLine(item.color + " " + item.number);
+            }
+        }
+
+        public int getRemainingPieces()
+        {
+            return remainingPieces;
         }
     }
 }

@@ -186,5 +186,15 @@ namespace Rummikub
                 player.preparePlayerToNewGame();
             }
         }
+        public void findClosestToWin()
+        {
+            int min = players.Min(player => player.getRemainingPieces());
+            var lowestValues = players.Where(player => player.getRemainingPieces() == min);
+            Console.WriteLine("\n \n \n Bitmeye en yakın olanlar ve kalan taş sayıları:");
+            foreach (var item in lowestValues)
+            {
+                Console.WriteLine(item.Name + " " + item.getRemainingPieces());
+            }
+        }
     }
 }
